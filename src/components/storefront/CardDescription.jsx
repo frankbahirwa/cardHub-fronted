@@ -50,7 +50,7 @@ const CardDescription = () => {
             price: cardDetails.price,
             cardType: cardDetails.cardType,
         });
-        navigate('/cart');
+
     };
 
     if (loading) {

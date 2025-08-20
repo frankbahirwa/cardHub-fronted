@@ -41,7 +41,7 @@ function App() {
             <Route path="/testimonials" element={<Testimonials />} />
             <Route path="/admin/login" element={<Login />} />
             <Route path='/desc/:id' element={<CardDescription />} />
-            <Route path="/admin/dashboard" element={<Dashboard />}>
+            <Route path="/admin/dashboard" element={<DashboardLayout />}>
               <Route path="cards" element={<CardManager />} />
               <Route path="testimonials" element={<TestimonialManager />} />
               <Route path="notifications" element={<NotificationManager />} />

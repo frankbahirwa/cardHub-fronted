@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:5001';
+const API_BASE = 'https://cardhub-backend.onrender.com';
 
 const CardItem = ({ card, onAddToCart }) => {
     const location = useLocation();

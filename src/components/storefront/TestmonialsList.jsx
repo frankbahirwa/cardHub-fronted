@@ -21,19 +21,21 @@ const TestimonialsList = () => {
     const [testimonials, setTestimonials] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const fetchTestimonials = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get("/api/testimonials");
+            console.log("Fetched testimonials:", res.data);
+            setTestimonials(res.data);
+        } catch (err) {
+            console.error("Error fetching testimonials:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        axios
-            .get(`/api/testimonials`)
-            .then((res) => {
-                console.log('received testimonial', res.data);
-                setTestimonials(Array.isArray(res.data) ? res.data : []);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error('Error fetching testimonials:', err);
-                setTestimonials([]);
-                setLoading(false);
-            });
+        fetchTestimonials()
     }, []);
 
     if (loading) {

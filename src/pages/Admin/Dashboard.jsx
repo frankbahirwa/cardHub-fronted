@@ -19,7 +19,7 @@ const Dashboard = () => {
                     <Route path="*" element={<h2 className="text-2xl text-white">Welcome to Dashboard</h2>} />
                 </Routes>
             </DashboardLayout>
-            
+
         </>
 
     );

@@ -54,6 +54,7 @@ const CheckoutForm = () => {
             email,
         };
 
+        console.log('Submitting payload:', preparedPayload);
         setPreparedPayload(statePayload);
 
         // Show QR if unknown card type

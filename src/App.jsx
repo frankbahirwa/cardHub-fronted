@@ -20,7 +20,6 @@ import PurchaseManager from './components/admin/PurchaseManager';
 import { CartProvider } from './context/CartContext.jsx';
 import Shop from './pages/storefront/Shop.jsx';
 import CardDescription from './components/storefront/CardDescription.jsx';
-import Dashboard from './pages/admin/Dashboard.jsx';
 import FreshCardForm from './components/storefront/FreshCardForm.jsx';
 import NonFreshCardForm from './components/storefront/NonFreshCardForm';
 

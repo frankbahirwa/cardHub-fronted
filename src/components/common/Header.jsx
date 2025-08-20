@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { FaHome, FaInfoCircle, FaServicestack, FaStar, FaShoppingCart, FaStore, FaUserShield } from 'react-icons/fa';
-import Logo from '../../assets/images/logo.png'; 
+import Logo from '../../assets/images/Logo.png'; 
 
 const Header = () => {
     const { cartItems } = useCart();

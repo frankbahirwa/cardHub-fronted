@@ -12,14 +12,11 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       proxy: {
         '/api': {
-          target: env.VITE_API_BASE_URL,
+          target: import.meta.env.VITE_API_BASE_URL,
           changeOrigin: true,
           secure: false
         }
       }
     },
-    define: {
-      'process.env': env
-    }
   };
 });

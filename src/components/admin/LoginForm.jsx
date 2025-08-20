@@ -8,6 +8,7 @@ import Button from "../common/Button.jsx";
 const LoginForm = ({ onLogin }) => {
     const [credentials, setCredentials] = useState({ username: "", password: "" });
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false); // 🔹 NEW
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -16,6 +17,8 @@ const LoginForm = ({ onLogin }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true); // start loading
+        setError("");
         try {
             const res = await api.post("/api/admin/login", credentials);
             onLogin(res.data.token);
@@ -23,6 +26,8 @@ const LoginForm = ({ onLogin }) => {
         } catch (err) {
             setError(err.response?.data?.message || "Invalid credentials");
             console.error("Login error:", err);
+        } finally {
+            setLoading(false); // stop loading
         }
     };
 
@@ -34,7 +39,7 @@ const LoginForm = ({ onLogin }) => {
         >
             <motion.form
                 onSubmit={handleSubmit}
-                className="bg-gray-900 p-8 rounded-2xl h-90 shadow-2xl text-white max-w-md w-full space-y-6 shadow-[0_4px_6px_rgba(255,255,255,0.3)]"
+                className="bg-gray-900 p-8 rounded-2xl shadow-2xl text-white max-w-md w-full space-y-6 shadow-[0_4px_6px_rgba(255,255,255,0.3)]"
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 100 }}
@@ -102,9 +107,24 @@ const LoginForm = ({ onLogin }) => {
                 >
                     <Button
                         type="submit"
-                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                        disabled={loading} // 🔹 Disable while loading
+                        className={`w-full flex items-center justify-center gap-2 font-semibold py-3 rounded-lg transition-colors ${loading
+                                ? "bg-gray-600 cursor-not-allowed"
+                                : "bg-blue-600 hover:bg-blue-700 text-white"
+                            }`}
                     >
-                        <FaSignInAlt /> Login
+                        {loading ? (
+                            <motion.div
+                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
+                                initial={{ rotate: 0 }}
+                                animate={{ rotate: 360 }}
+                                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                            />
+                        ) : (
+                            <>
+                                <FaSignInAlt /> Login
+                            </>
+                        )}
                     </Button>
                 </motion.div>
             </motion.form>

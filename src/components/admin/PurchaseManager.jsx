@@ -18,6 +18,7 @@ const PurchaseManager = () => {
         approved: false,
         rejected: false,
     });
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchAllPurchases();
@@ -25,41 +26,52 @@ const PurchaseManager = () => {
     }, []);
 
     const fetchAllPurchases = async () => {
+        setLoading(true);
         try {
             const res = await api.get("/api/purchases");
             setPurchases(res.data);
         } catch (err) {
             console.error("Error fetching purchases:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
     const fetchRejectedPurchases = async () => {
+        setLoading(true);
         try {
             const res = await api.get("/api/purchases/rejected");
             setPurchases((prev) => [...prev, ...res.data]);
         } catch (err) {
             console.error("Error fetching rejected purchases:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleApprove = async (id) => {
+        setLoading(true);
         try {
             await api.patch(`/api/purchases/${id}/approve`);
             fetchAllPurchases();
         } catch (err) {
             console.error("Error approving purchase:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleReject = async (id) => {
+        setLoading(true);
         try {
             await api.patch(`/api/purchases/${id}/reject`);
             fetchAllPurchases();
         } catch (err) {
             console.error("Error rejecting purchase:", err);
+        } finally {
+            setLoading(false);
         }
     };
-
 
     const toggleSection = (section) => {
         setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -75,7 +87,7 @@ const PurchaseManager = () => {
         <AnimatePresence>
             {items.length > 0 ? (
                 <motion.div
-                    className="grid md:grid-cols-2 gap-6 mt-4 "
+                    className="grid md:grid-cols-2 gap-6 mt-4"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                 >
@@ -102,10 +114,10 @@ const PurchaseManager = () => {
                                     Status:{" "}
                                     <span
                                         className={`px-2 py-1 text-sm rounded ${status === "pending"
-                                                ? "bg-yellow-500 text-black"
-                                                : status === "approved"
-                                                    ? "bg-green-600 text-white"
-                                                    : "bg-red-600 text-white"
+                                            ? "bg-yellow-500 text-black"
+                                            : status === "approved"
+                                                ? "bg-green-600 text-white"
+                                                : "bg-red-600 text-white"
                                             }`}
                                     >
                                         {status}
@@ -151,7 +163,13 @@ const PurchaseManager = () => {
     );
 
     return (
-        <div className="p-6">
+        <div className="p-6 relative">
+            {loading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="loader border-t-4 border-blue-600 border-solid rounded-full w-16 h-16 animate-spin"></div>
+                </div>
+            )}
+
             <motion.h2
                 className="text-3xl font-bold mb-6 text-white flex items-center gap-2"
                 initial={{ opacity: 0, y: -10 }}
@@ -162,7 +180,6 @@ const PurchaseManager = () => {
 
             {["pending", "approved", "rejected"].map((status) => (
                 <div key={status} className="mb-6">
-                    {/* Section Header */}
                     <button
                         onClick={() => toggleSection(status)}
                         className="flex justify-between items-center w-full bg-gray-700 px-4 py-3 rounded-lg shadow-md text-white font-semibold hover:bg-gray-600 transition"
@@ -171,7 +188,6 @@ const PurchaseManager = () => {
                         {openSections[status] ? <FaChevronUp /> : <FaChevronDown />}
                     </button>
 
-                    {/* Collapsible Content */}
                     <AnimatePresence>
                         {openSections[status] && (
                             <motion.div

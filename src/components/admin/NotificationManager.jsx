@@ -1,4 +1,3 @@
-// src/components/admin/NotificationManager.js
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import Button from "../common/Button";
@@ -10,17 +9,21 @@ const NotificationManager = () => {
     const [formData, setFormData] = useState({ title: "", message: "" });
     const [editingId, setEditingId] = useState(null);
     const [showForm, setShowForm] = useState(false);
+    const [loading, setLoading] = useState(false); // 🔹 loader state
 
     useEffect(() => {
         fetchNotifications();
     }, []);
 
     const fetchNotifications = async () => {
+        setLoading(true);
         try {
             const res = await api.get("/api/notifications");
             setNotifications(res.data);
         } catch (err) {
             console.error("Error fetching notifications:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -30,18 +33,21 @@ const NotificationManager = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             if (editingId) {
                 await api.put(`/api/notifications/${editingId}`, formData);
             } else {
                 await api.post("/api/notifications", formData);
             }
-            fetchNotifications();
+            await fetchNotifications();
             setFormData({ title: "", message: "" });
             setEditingId(null);
             setShowForm(false);
         } catch (err) {
             console.error("Error saving notification:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -52,11 +58,14 @@ const NotificationManager = () => {
     };
 
     const handleDelete = async (id) => {
+        setLoading(true);
         try {
             await api.delete(`/api/notifications/${id}`);
-            fetchNotifications();
+            await fetchNotifications();
         } catch (err) {
             console.error("Error deleting notification:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -64,8 +73,27 @@ const NotificationManager = () => {
         <div className="relative p-6">
             <h2 className="text-3xl font-bold mb-6 text-white">Manage Notifications</h2>
 
+            {/* 🔹 Loader Overlay */}
+            <AnimatePresence>
+                {loading && (
+                    <motion.div
+                        className="absolute inset-0 bg-black/50 flex items-center justify-center z-50"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <motion.div
+                            className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin"
+                            initial={{ rotate: 0 }}
+                            animate={{ rotate: 360 }}
+                            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Floating Add Button */}
-            {!showForm && (
+            {!showForm && !loading && (
                 <motion.button
                     onClick={() => {
                         setShowForm(true);
@@ -82,7 +110,7 @@ const NotificationManager = () => {
 
             {/* Collapsible Form */}
             <AnimatePresence>
-                {showForm && (
+                {showForm && !loading && (
                     <motion.form
                         onSubmit={handleSubmit}
                         className="bg-gray-800 p-5 rounded-lg mb-6 shadow-lg border border-gray-700"
@@ -129,7 +157,7 @@ const NotificationManager = () => {
 
             {/* Notifications List */}
             <AnimatePresence>
-                {notifications.length > 0 ? (
+                {!loading && notifications.length > 0 ? (
                     <motion.ul
                         className="space-y-4"
                         initial={{ opacity: 0 }}
@@ -150,7 +178,7 @@ const NotificationManager = () => {
                                 <div className="flex flex-col gap-2">
                                     <Button
                                         onClick={() => handleEdit(notif)}
-                                        className=" hover:bg-yellow-600 text-black"
+                                        className="hover:bg-yellow-600 text-black"
                                     >
                                         <FaEdit size={16} />
                                     </Button>
@@ -165,13 +193,15 @@ const NotificationManager = () => {
                         ))}
                     </motion.ul>
                 ) : (
-                    <motion.p
-                        className="text-gray-400 mt-4"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                    >
-                        No notifications found.
-                    </motion.p>
+                    !loading && (
+                        <motion.p
+                            className="text-gray-400 mt-4"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                        >
+                            No notifications found.
+                        </motion.p>
+                    )
                 )}
             </AnimatePresence>
         </div>

@@ -1,34 +1,31 @@
-import React, { use, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { motion } from 'framer-motion';
 import { FaClock, FaTag, FaCreditCard, FaShoppingCart } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext';
-import { useNavigate } from 'react-router-dom';
 
 const API_BASE = 'https://cardhub-backend.onrender.com';
 
 const CardDescription = () => {
     const navigate = useNavigate();
     const { id } = useParams();
+    const { addToCart } = useCart();
+
     const [cardDetails, setCardDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { addToCart } = useCart();
+
     useEffect(() => {
         const fetchCard = async () => {
             setLoading(true);
             setError(null);
             try {
-                if (!id) {
-                    throw new Error('Card ID is missing in URL');
-                }
-                console.log('Sending API request for card ID:', id);
+                if (!id) throw new Error('Card ID is missing in URL');
+
                 const res = await api.post('/api/cards/id', { id });
-                console.log('API response:', res.data);
-                if (!res.data) {
-                    throw new Error('No card data returned');
-                }
+                if (!res.data) throw new Error('No card data returned');
+
                 setCardDetails(res.data);
             } catch (err) {
                 console.error('Error fetching card details:', err.response?.data || err.message);
@@ -50,7 +47,7 @@ const CardDescription = () => {
             price: cardDetails.price,
             cardType: cardDetails.cardType,
         });
-
+        navigate('/cart');
     };
 
     if (loading) {
@@ -64,26 +61,23 @@ const CardDescription = () => {
     if (error || !cardDetails) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-900">
-                <p className="text-xl text-red-400">
+                <p className="text-xl text-red-400 text-center">
                     {error || 'Failed to load card details. Please try again later.'}
                 </p>
             </div>
         );
     }
 
-    const deliveryTime = "3 days";
+    const deliveryTime = '3 days';
     const getCardTypeDisplay = (cardType) => {
         switch (cardType) {
-            case 'FreshCard':
-                return 'Fresh Card';
-            case 'AgedCard':
-                return 'Aged Card';
-            case 'BankCard':
-                return 'Bank Logs';
-            default:
-                return cardType;
+            case 'FreshCard': return 'Fresh Card';
+            case 'AgedCard': return 'Aged Card';
+            case 'BankCard': return 'Bank Logs';
+            default: return cardType;
         }
     };
+
     const cardTypeMessage =
         cardDetails.cardType === 'FreshCard'
             ? 'This is a Fresh Card.'
@@ -99,13 +93,13 @@ const CardDescription = () => {
             transition={{ duration: 0.5 }}
         >
             <motion.div
-                className="max-w-4xl mx-auto text-white  rounded-lg overflow-hidden"
+                className="max-w-4xl mx-auto text-white rounded-lg overflow-hidden"
                 initial={{ y: 50 }}
                 animate={{ y: 0 }}
                 transition={{ type: 'spring', stiffness: 100 }}
             >
                 <div className="p-6">
-                    <h1 className="text-4xl font-bold mb-4 text-white flex items-center gap-2">
+                    <h1 className="text-4xl font-bold mb-4 flex items-center gap-2">
                         <FaCreditCard className="text-blue-500" /> {cardDetails.title}
                     </h1>
 
@@ -120,9 +114,8 @@ const CardDescription = () => {
                                 <img
                                     src={`${API_BASE}${cardDetails.imageUrl}`}
                                     alt={cardDetails.title}
-                                    className="h-64 relative left-60 top-20 object-fit rounded-t-xl"
+                                    className="h-64 w-full object-cover rounded-t-xl"
                                     onError={(e) => {
-                                        console.error(`Failed to load image: ${API_BASE}${cardDetails.imageUrl}`);
                                         e.target.src = `${API_BASE}/images/default-card.png`;
                                     }}
                                 />
@@ -131,30 +124,32 @@ const CardDescription = () => {
                                 {getCardTypeDisplay(cardDetails.cardType)}
                             </div>
                         </div>
+
                         <div className="p-6">
-                            <h2 className="text-2xl font-semibold text-white mb-2">{cardDetails.title}</h2>
+                            <h2 className="text-2xl font-semibold mb-2">{cardDetails.title}</h2>
                             <p className="text-gray-300 mb-2 flex items-center gap-2">
                                 <FaCreditCard className="text-blue-400" /> Bank: {cardDetails.bank || 'N/A'}
                             </p>
 
                             {cardDetails.cardType === 'BankCard' && cardDetails.balance && (
                                 <p className="text-green-400 mb-2 flex items-center gap-2">
-                                    <FaCreditCard className="text-green-400" /> Balance: ${cardDetails.balance}
+                                    <FaCreditCard /> Balance: ${cardDetails.balance}
                                 </p>
                             )}
                             {cardDetails.cardType === 'AgedCard' && cardDetails.usageDurationMonths && (
                                 <p className="text-blue-400 mb-2 flex items-center gap-2">
-                                    <FaClock className="text-blue-400" /> Aged: {cardDetails.usageDurationMonths} months
+                                    <FaClock /> Aged: {cardDetails.usageDurationMonths} months
                                 </p>
                             )}
                             {cardDetails.cardType === 'AgedCard' && cardDetails.condition && (
                                 <p className="text-gray-300 mb-2 flex items-center gap-2">
-                                    <FaTag className="text-gray-300" /> Condition: {cardDetails.condition}
+                                    <FaTag /> Condition: {cardDetails.condition}
                                 </p>
                             )}
                             {cardDetails.description && (
                                 <p className="text-gray-400 mt-4">{cardDetails.description}</p>
                             )}
+
                             <motion.button
                                 onClick={handleAddToCart}
                                 className="mt-4 bg-yellow-400 text-black font-bold py-2 px-4 rounded-lg hover:bg-yellow-300 transition flex items-center gap-2 w-full justify-center"
@@ -168,9 +163,7 @@ const CardDescription = () => {
 
                     <div className="flex items-center gap-4 mb-4">
                         <FaClock className="text-white text-xl" />
-                        <p className="text-md text-white font-semibold">
-                            Delivery Time: {deliveryTime}
-                        </p>
+                        <p className="text-md text-white font-semibold">Delivery Time: {deliveryTime}</p>
                     </div>
 
                     <div className="flex items-center gap-4 mb-4">
@@ -184,35 +177,6 @@ const CardDescription = () => {
                             Price: ${cardDetails.price || 'N/A'}
                         </p>
                     </div>
-
-
-
-                    {cardDetails.cardType === 'BankCard' && cardDetails.balance && (
-                        <div className="flex items-center gap-4 mb-4">
-                            <FaCreditCard className="text-white text-xl" />
-                            <p className="text-md text-green-400 font-semibold">
-                                Balance: ${cardDetails.balance}
-                            </p>
-                        </div>
-                    )}
-
-                    {cardDetails.cardType === 'AgedCard' && cardDetails.usageDurationMonths && (
-                        <div className="flex items-center gap-4 mb-4">
-                            <FaClock className="text-white text-xl" />
-                            <p className="text-md text-blue-400 font-semibold">
-                                Aged: {cardDetails.usageDurationMonths} months
-                            </p>
-                        </div>
-                    )}
-
-                    {cardDetails.cardType === 'AgedCard' && cardDetails.condition && (
-                        <div className="flex items-center gap-4 mb-4">
-                            <FaTag className="text-white text-xl" />
-                            <p className="text-md text-gray-300 font-semibold">
-                                Condition: {cardDetails.condition}
-                            </p>
-                        </div>
-                    )}
                 </div>
             </motion.div>
         </motion.div>

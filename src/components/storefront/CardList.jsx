@@ -8,14 +8,19 @@ import { Link } from 'react-router-dom';
 const CardList = () => {
     const [cards, setCards] = useState([]);
     const [collapsedSections, setCollapsedSections] = useState({});
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         api.get('/api/cards')
             .then((res) => {
                 console.log('Cards fetched:', res.data);
                 setCards(res.data);
+                setLoading(false);
             })
-            .catch((err) => console.error('Error fetching cards:', err));
+            .catch((err) => {
+                console.error('Error fetching cards:', err);
+                setLoading(false);
+            });
     }, []);
 
     const groupedCards = cards.reduce(
@@ -46,6 +51,14 @@ const CardList = () => {
             [category]: !prev[category],
         }));
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <div className="loader animate-spin rounded-full h-12 w-12 border-t-4 border-yellow-400"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 animate-fade-in-slow">

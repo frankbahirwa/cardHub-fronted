@@ -34,6 +34,8 @@ const FreshCardForm = () => {
         address: '',
     });
 
+    const [loading, setLoading] = useState(false);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -52,7 +54,6 @@ const FreshCardForm = () => {
             return;
         }
 
-        // Payload matches backend model
         const payload = {
             cardType: 'FreshCard',
             cards: [{ card: cardData.id }],
@@ -63,6 +64,7 @@ const FreshCardForm = () => {
         };
 
         try {
+            setLoading(true);
             console.log('Sending purchase order payload:', payload);
             const response = await api.post('/api/purchases', payload);
             console.log('Purchase order response:', response.data);
@@ -82,11 +84,19 @@ const FreshCardForm = () => {
         } catch (error) {
             console.error('Error creating purchase order:', error);
             alert('Failed to create purchase order. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="flex justify-center items-center bg-gradient-to-br from-blue-900 via-gray-900 to-gray-800 min-h-screen">
+        <div className="flex justify-center items-center bg-gradient-to-br from-blue-900 via-gray-900 to-gray-800 min-h-screen relative">
+            {loading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="loader border-t-4 border-blue-600 border-solid rounded-full w-16 h-16 animate-spin"></div>
+                </div>
+            )}
+
             <form
                 onSubmit={(e) => e.preventDefault()}
                 className="w-full max-w-xl bg-white/10 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-blue-800"
@@ -184,8 +194,9 @@ const FreshCardForm = () => {
                     type="button"
                     onClick={handleSubmitOrder}
                     className="w-full mt-5 bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-2 rounded-lg shadow-lg transition-all duration-200"
+                    disabled={loading}
                 >
-                    Submit Order
+                    {loading ? 'Processing...' : 'Submit Order'}
                 </button>
             </form>
         </div>

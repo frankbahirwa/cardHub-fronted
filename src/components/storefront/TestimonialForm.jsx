@@ -1,4 +1,3 @@
-// src/components/storefront/TestimonialForm.js
 import React, { useState } from 'react';
 import Button from '../common/Button';
 import api from '../../services/api';
@@ -8,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const TestimonialForm = () => {
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,6 +16,7 @@ const TestimonialForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            setLoading(true);
             console.log('Submitting testimonial:', formData); // Log the request payload
             const response = await api.post('/api/testimonials', formData);
             console.log('Backend response:', response.data); // Log the backend response
@@ -24,15 +25,26 @@ const TestimonialForm = () => {
         } catch (err) {
             console.error('Error submitting testimonial:', err);
             toast.error('Failed to submit your testimonial. Please try again later.');
+        } finally {
+            setLoading(false);
         }
     };
 
     if (submitted) {
-        return <p className="text-green-400 text-center">Thank you for your testimonial! It will be reviewed soon.</p>;
+        return <p className="text-green-400 text-center mt-4">Thank you for your testimonial! It will be reviewed soon.</p>;
     }
 
     return (
-        <form onSubmit={handleSubmit} className="bg-gray-900 p-6 rounded-lg shadow-lg text-white max-w-md mx-auto">
+        <form
+            onSubmit={handleSubmit}
+            className="bg-gray-900 p-6 rounded-lg shadow-lg text-white max-w-md mx-auto relative"
+        >
+            {loading && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg z-10">
+                    <div className="loader border-t-4 border-blue-600 border-solid rounded-full w-12 h-12 animate-spin"></div>
+                </div>
+            )}
+
             <h2 className="text-2xl font-bold mb-4">Share Your Experience</h2>
             <input
                 type="text"
@@ -60,7 +72,9 @@ const TestimonialForm = () => {
                 rows="4"
                 required
             />
-            <Button type="submit" className="w-full">Submit</Button>
+            <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Submitting...' : 'Submit'}
+            </Button>
         </form>
     );
 };

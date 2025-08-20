@@ -7,12 +7,12 @@ import Button from '../common/Button.jsx';
 const API_BASE = 'https://cardhub-backend.onrender.com';
 
 const CardManager = () => {
-    
     const [cards, setCards] = useState([]);
     const [formData, setFormData] = useState(defaultFormState());
     const [editingId, setEditingId] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     function defaultFormState() {
         return {
@@ -36,6 +36,7 @@ const CardManager = () => {
     }, []);
 
     const fetchCards = async () => {
+        setLoading(true);
         try {
             const res = await api.get('/api/cards');
             console.log('Cards fetched:', res.data);
@@ -44,6 +45,8 @@ const CardManager = () => {
         } catch (err) {
             console.error('Error fetching cards:', err);
             setError('Failed to fetch cards. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -62,21 +65,15 @@ const CardManager = () => {
     };
 
     const handleUpdate = async (id, updates) => {
+        setLoading(true);
         try {
-            // Ensure required fields are included and exclude only the image-related fields
-            const {
-                image, // Exclude image
-                imageFile, // Exclude imageFile
-                imagePreview, // Exclude imagePreview
-                ...filteredUpdates
-            } = updates;
+            const { image, imageFile, imagePreview, ...filteredUpdates } = updates;
 
-            // Include cardType explicitly from formData if not present in updates
             if (!filteredUpdates.cardType) {
                 filteredUpdates.cardType = formData.cardType;
             }
 
-            const response = await api.put(`/api/cards/${id}`, filteredUpdates, {
+            await api.put(`/api/cards/${id}`, filteredUpdates, {
                 headers: { 'Content-Type': 'application/json' },
             });
 
@@ -85,11 +82,14 @@ const CardManager = () => {
         } catch (err) {
             console.error('Error updating card:', err.response?.data || err.message);
             setError(err.response?.data?.message || 'Failed to update card. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         setError(null);
         try {
             const formPayload = new FormData();
@@ -114,7 +114,6 @@ const CardManager = () => {
             }
 
             if (editingId) {
-                // Delegate update logic to handleUpdate
                 await handleUpdate(editingId, formPayload);
             } else {
                 await api.post('/api/cards', formPayload, {
@@ -130,6 +129,8 @@ const CardManager = () => {
         } catch (err) {
             console.error('Error saving card:', err.response?.data || err.message);
             setError(err.response?.data?.message || 'Failed to save card. Check required fields.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -149,9 +150,8 @@ const CardManager = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this card?')) {
-            return;
-        }
+        if (!window.confirm('Are you sure you want to delete this card?')) return;
+        setLoading(true);
         setError(null);
         try {
             await api.delete(`/api/cards/${id}`);
@@ -160,24 +160,28 @@ const CardManager = () => {
         } catch (err) {
             console.error('Error deleting card:', err.response?.data || err.message);
             setError(err.response?.data?.message || 'Failed to delete card. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
     const getCardTypeDisplay = (cardType) => {
         switch (cardType) {
-            case 'FreshCard':
-                return 'Fresh Card';
-            case 'AgedCard':
-                return 'Aged Card';
-            case 'BankCard':
-                return 'Bank Logs';
-            default:
-                return cardType;
+            case 'FreshCard': return 'Fresh Card';
+            case 'AgedCard': return 'Aged Card';
+            case 'BankCard': return 'Bank Logs';
+            default: return cardType;
         }
     };
 
     return (
-        <div className="container mx-auto px-4 py-8 text-white">
+        <div className="container mx-auto px-4 py-8 text-white relative">
+            {loading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="loader border-t-4 border-blue-600 border-solid rounded-full w-16 h-16 animate-spin"></div>
+                </div>
+            )}
+
             <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
                 <FiCreditCard className="text-yellow-400" /> Manage Cards
             </h2>
@@ -358,7 +362,6 @@ const CardManager = () => {
                                     alt={card.title}
                                     className="w-full h-44 object-cover flex-shrink-0"
                                     onError={(e) => {
-                                        console.error(`Failed to load image: ${API_BASE}${card.imageUrl}`);
                                         e.target.src = `${API_BASE}/images/default-card.png`;
                                     }}
                                 />

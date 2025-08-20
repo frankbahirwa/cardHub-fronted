@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../../services/api';
 
@@ -17,6 +17,8 @@ const NonFreshCardForm = () => {
         totalAmount: totalAmount,
     });
 
+    const [loading, setLoading] = useState(false);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -25,7 +27,6 @@ const NonFreshCardForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Payload matching backend requirements
         const payload = {
             email: formData.email,
             totalAmount: formData.totalAmount,
@@ -33,6 +34,7 @@ const NonFreshCardForm = () => {
         };
 
         try {
+            setLoading(true);
             console.log('Submitting payload:', payload);
 
             const response = await api.post('/api/normals', payload);
@@ -44,11 +46,19 @@ const NonFreshCardForm = () => {
         } catch (error) {
             console.error('Error placing order:', error);
             alert('Failed to place order. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-900">
+        <div className="flex justify-center items-center min-h-screen bg-gray-900 relative">
+            {loading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="loader border-t-4 border-blue-600 border-solid rounded-full w-16 h-16 animate-spin"></div>
+                </div>
+            )}
+
             <form
                 onSubmit={handleSubmit}
                 className="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-lg"
@@ -68,8 +78,9 @@ const NonFreshCardForm = () => {
                 <button
                     type="submit"
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg"
+                    disabled={loading}
                 >
-                    Submit Order
+                    {loading ? 'Processing...' : 'Submit Order'}
                 </button>
             </form>
         </div>

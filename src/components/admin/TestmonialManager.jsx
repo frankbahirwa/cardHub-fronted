@@ -1,4 +1,3 @@
-// src/components/admin/TestimonialManager.js
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import Button from "../common/Button";
@@ -7,41 +6,57 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const TestimonialManager = () => {
     const [testimonials, setTestimonials] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchTestimonials();
     }, []);
 
     const fetchTestimonials = async () => {
+        setLoading(true);
         try {
             const res = await api.get("/api/testimonials/pending");
             console.log("Fetched testimonials:", res.data);
             setTestimonials(res.data);
         } catch (err) {
             console.error("Error fetching testimonials:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleApprove = async (id) => {
+        setLoading(true);
         try {
             await api.post(`/api/testimonials/${id}/approve`);
             fetchTestimonials();
         } catch (err) {
             console.error("Error approving testimonial:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
+        setLoading(true);
         try {
             await api.delete(`/api/testimonials/${id}`);
             fetchTestimonials();
         } catch (err) {
             console.error("Error deleting testimonial:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="p-2">
+        <div className="p-2 relative">
+            {loading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="loader border-t-4 border-blue-600 border-solid rounded-full w-16 h-16 animate-spin"></div>
+                </div>
+            )}
+
             <h2 className="text-3xl font-bold mb-6 text-white flex items-center gap-2">
                 <FaUserCircle className="text-blue-500" /> Manage Testimonials
             </h2>
@@ -63,8 +78,8 @@ const TestimonialManager = () => {
                                         <p className="text-white font-semibold">{testimonial.name}</p>
                                         <p
                                             className={`text-sm font-medium px-2 py-1 rounded ${testimonial.approved
-                                                ? "bg-green-600 text-white"
-                                                : "bg-yellow-500 text-black"
+                                                    ? "bg-green-600 text-white"
+                                                    : "bg-yellow-500 text-black"
                                                 }`}
                                         >
                                             {testimonial.approved ? "Approved" : "Pending"}

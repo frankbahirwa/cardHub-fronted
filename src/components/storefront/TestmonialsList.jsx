@@ -1,4 +1,3 @@
-// src/components/storefront/TestimonialsList.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
@@ -26,7 +25,7 @@ const TestimonialsList = () => {
         axios
             .get(`/api/testimonials`)
             .then((res) => {
-                console.log('received testimonial' , res.data)
+                console.log('received testimonial', res.data);
                 setTestimonials(Array.isArray(res.data) ? res.data : []);
                 setLoading(false);
             })
@@ -55,11 +54,18 @@ const TestimonialsList = () => {
 
     return (
         <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            className="relative grid grid-cols-1 md:grid-cols-2 gap-6"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
         >
+            {/* Optional: overlay loader if you want to refresh data later */}
+            {loading && (
+                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center rounded-lg z-10">
+                    <div className="loader animate-spin rounded-full h-12 w-12 border-t-4 border-yellow-400"></div>
+                </div>
+            )}
+
             {testimonials.map((testimonial) => (
                 <motion.div key={testimonial._id} variants={itemVariants}>
                     <TestimonialItem testimonial={testimonial} />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { motion } from 'framer-motion';
 import TestimonialItem from '../common/TestmonialItem';
+import api from '../../services/api';
 
 const containerVariants = {
     hidden: {},

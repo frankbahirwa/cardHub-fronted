@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '../../context/CartContext.jsx';
 import QRCodeDisplay from '../common/QrCodeDisplay.jsx';
 import { motion } from 'framer-motion';
-import { FaBitcoin, FaEnvelope, FaMoneyBillWave, FaCheckCircle } from 'react-icons/fa';
+import { FaBitcoin, FaEnvelope, FaMoneyBillWave } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const PAYMENT_METHODS = {
@@ -20,15 +20,14 @@ const CheckoutForm = () => {
     const navigate = useNavigate();
     const { cartItems, totalAmount, clearCart } = useCart();
 
-    // Fallback: use location.state first, otherwise use cartItems
     const cardData = location.state?.cardData || (cartItems.length === 1 ? cartItems[0] : null);
     const initialAmount = location.state?.totalAmount || totalAmount;
-
 
     const [paymentMethod, setPaymentMethod] = useState('');
     const [email, setEmail] = useState('');
     const [showQR, setShowQR] = useState(false);
     const [convertedAmount, setConvertedAmount] = useState(0);
+    const [preparedPayload, setPreparedPayload] = useState(null);
 
     useEffect(() => {
         if (paymentMethod && PAYMENT_METHODS[paymentMethod]) {
@@ -55,23 +54,10 @@ const CheckoutForm = () => {
             email,
         };
 
-        console.log('--- Checkout Form Submitted ---');
-        console.log('Card Data:', cardData);
-        console.log('Total Amount:', initialAmount);
-        console.log('Selected Payment Method:', paymentMethod);
-        console.log('Email:', email);
-        console.log('State Payload:', statePayload);
+        setPreparedPayload(statePayload);
 
-        if (cardData?.cardType === 'FreshCard') {
-            console.log('Redirecting to /freshcard');
-            navigate('/freshcard', { state: statePayload });
-        } else if (cardData?.cardType === 'AgedCard' || cardData?.cardType === 'BankCard') {
-            console.log('Redirecting to /NonFreshCard');
-            navigate('/NonFreshCard', { state: statePayload });
-        } else {
-            console.log('Unknown card type. Showing QR code instead.');
-            setShowQR(true);
-        }
+        // Show QR if unknown card type
+        setShowQR(true);
 
         clearCart();
     };
@@ -136,25 +122,47 @@ const CheckoutForm = () => {
                     </div>
 
                     <button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded w-full">
-                        Proceed
+                        Proceed to payment
                     </button>
                 </motion.form>
             ) : (
                 <motion.div className="text-center">
                     <QRCodeDisplay
-                        paymentAddress={PAYMENT_METHODS[paymentMethod].address}
+                        paymentAddress={PAYMENT_METHODS[paymentMethod]?.address}
                         paymentMethod={paymentMethod}
-                        logo={PAYMENT_METHODS[paymentMethod].logo}
+                        logo={PAYMENT_METHODS[paymentMethod]?.logo}
                     />
                     <p className="mt-4 text-gray-300">Amount: {convertedAmount} {paymentMethod}</p>
-                    <p className="mt-2 text-gray-300">Payment Address: {PAYMENT_METHODS[paymentMethod].address}</p>
+                    <p className="mt-2 text-gray-300">Payment Address: {PAYMENT_METHODS[paymentMethod]?.address}</p>
                     <button
-                        onClick={() => copyToClipboard(PAYMENT_METHODS[paymentMethod].address)}
+                        onClick={() => copyToClipboard(PAYMENT_METHODS[paymentMethod]?.address)}
                         className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mt-4"
                     >
                         Copy Address
                     </button>
                 </motion.div>
+            )}
+
+            {/* Manual Proceed Buttons */}
+            {preparedPayload && !showQR && (
+                <div className="mt-4 space-x-2">
+                    {preparedPayload.cardData?.cardType === 'FreshCard' && (
+                        <button
+                            onClick={() => navigate('/freshcard', { state: preparedPayload })}
+                            className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded"
+                        >
+                            Provide delivery information
+                        </button>
+                    )}
+                    {['AgedCard', 'BankCard'].includes(preparedPayload.cardData?.cardType) && (
+                        <button
+                            onClick={() => navigate('/NonFreshCard', { state: preparedPayload })}
+                            className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded"
+                        >
+                            Provide delivery information
+                        </button>
+                    )}
+                </div>
             )}
         </motion.div>
     );

@@ -6,7 +6,7 @@ import { FaClock, FaTag, FaCreditCard, FaShoppingCart } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:5001';
+const API_BASE = 'https://cardhub-backend.onrender.com';
 
 const CardDescription = () => {
     const navigate = useNavigate();

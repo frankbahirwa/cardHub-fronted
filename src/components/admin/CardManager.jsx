@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiCreditCard, FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
 import Button from '../common/Button.jsx';
 
-const API_BASE = 'http://localhost:5001';
+const API_BASE = 'https://cardhub-backend.onrender.com';
 
 const CardManager = () => {
+    
     const [cards, setCards] = useState([]);
     const [formData, setFormData] = useState(defaultFormState());
     const [editingId, setEditingId] = useState(null);

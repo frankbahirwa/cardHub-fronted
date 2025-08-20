@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:5001';
+const API_BASE = 'https://cardhub-backend.onrender.com';
 
 const AgedCardSelector = ({ card, onSelect }) => {
     const [agingMonths, setAgingMonths] = useState(1);

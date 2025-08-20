@@ -144,7 +144,7 @@ const CheckoutForm = () => {
             )}
 
             {/* Manual Proceed Buttons */}
-            {preparedPayload && !showQR && (
+            {preparedPayload && (
                 <div className="mt-4 space-x-2">
                     {preparedPayload.cardData?.cardType === 'FreshCard' && (
                         <button

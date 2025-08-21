@@ -26,9 +26,9 @@ import NonFreshCardForm from './components/storefront/NonFreshCardForm';
 function App() {
   return (
     <CartProvider>
-      <div className="min-h-screen flex flex-col bg-gray-900">
+      <div className="min-h-screen flex flex-col w-full bg-gray-900">
         <Header />
-        <main className="flex-grow container mx-auto px-4 py-8">
+        <main className="flex-grow container mx-auto w-screen px-4 py-8">
           <Routes>
             <Route path="/" exact element={<Home />} />
             <Route path="/about" element={<About />} />

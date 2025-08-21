@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaTwitter, FaFacebookF, FaInstagram } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const socialLinks = [
     {
@@ -29,6 +30,7 @@ const quickLinks = [
 ];
 
 const Footer = () => {
+    const navigate = useNavigate()
     return (
         <footer className="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 text-white pt-10 pb-6 mt-auto shadow-lg">
             <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
@@ -71,7 +73,7 @@ const Footer = () => {
                 </div>
             </div>
             <div className="border-t border-gray-700 mt-8 pt-4 text-center text-sm text-gray-400">
-                &copy; 2025 Card Hub. All rights reserved.
+                &copy; 2025 Card Hub. All rights reserved. <button onClick={() => navigate('/admin/login')} className='p-2 cursor-pointer'>...!</button>
             </div>
         </footer>
     );

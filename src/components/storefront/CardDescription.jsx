@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { FaClock, FaTag, FaCreditCard, FaShoppingCart } from 'react-icons/fa';
 import { useCart } from '../../context/CartContext';
 
-const API_BASE = 'https://cardhub-backend.onrender.com';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cardhub-backend.onrender.com';
 
 const CardDescription = () => {
     const navigate = useNavigate();

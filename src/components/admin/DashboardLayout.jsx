@@ -56,7 +56,7 @@ const DashboardLayout = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-grow p-6 md:ml-64">
+            <main className="flex-grow p-6 w-full md:ml-20 bg-gray-900 transition-all duration-300">
                 <Outlet />
             </main>
         </div>

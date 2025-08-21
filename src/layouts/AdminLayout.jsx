@@ -13,7 +13,7 @@ function AdminLayout({ children }) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen w-full bg-gray-100">
             <AdminNav />
             <div className="container mx-auto p-4">
                 <div className="flex justify-between items-center mb-4">

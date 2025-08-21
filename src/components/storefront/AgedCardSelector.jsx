@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const API_BASE = 'https://cardhub-backend.onrender.com';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cardhub-backend.onrender.com';
 
 const AgedCardSelector = ({ card, onSelect }) => {
     const [agingMonths, setAgingMonths] = useState(1);

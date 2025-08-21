@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiCreditCard, FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi';
 import Button from '../common/Button.jsx';
 
-const API_BASE = 'https://cardhub-backend.onrender.com';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://cardhub-backend.onrender.com';
 
 const CardManager = () => {
     const [cards, setCards] = useState([]);
@@ -39,11 +39,10 @@ const CardManager = () => {
         setLoading(true);
         try {
             const res = await api.get('/api/cards');
-            console.log('Cards fetched:', res.data);
             setCards(res.data);
             setError(null);
         } catch (err) {
-            console.error('Error fetching cards:', err);
+            console.error(err);
             setError('Failed to fetch cards. Please try again.');
         } finally {
             setLoading(false);
@@ -80,8 +79,8 @@ const CardManager = () => {
             alert('Card updated successfully');
             fetchCards();
         } catch (err) {
-            console.error('Error updating card:', err.response?.data || err.message);
-            setError(err.response?.data?.message || 'Failed to update card. Please try again.');
+            console.error(err);
+            setError('Failed to update card. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -101,17 +100,13 @@ const CardManager = () => {
             formPayload.append('cardNumber', formData.cardNumber);
             formPayload.append('password', formData.password);
 
-            if (formData.cardType === 'BankCard') {
-                formPayload.append('balance', formData.balance);
-            }
+            if (formData.cardType === 'BankCard') formPayload.append('balance', formData.balance);
             if (formData.cardType === 'AgedCard') {
                 formPayload.append('usageDurationMonths', formData.usageDurationMonths);
                 formPayload.append('condition', formData.condition);
             }
 
-            if (formData.imageFile) {
-                formPayload.append('image', formData.imageFile);
-            }
+            if (formData.imageFile) formPayload.append('image', formData.imageFile);
 
             if (editingId) {
                 await handleUpdate(editingId, formPayload);
@@ -127,8 +122,8 @@ const CardManager = () => {
             setEditingId(null);
             setShowForm(false);
         } catch (err) {
-            console.error('Error saving card:', err.response?.data || err.message);
-            setError(err.response?.data?.message || 'Failed to save card. Check required fields.');
+            console.error(err);
+            setError('Failed to save card. Check required fields.');
         } finally {
             setLoading(false);
         }
@@ -158,8 +153,8 @@ const CardManager = () => {
             alert('Card deleted successfully');
             fetchCards();
         } catch (err) {
-            console.error('Error deleting card:', err.response?.data || err.message);
-            setError(err.response?.data?.message || 'Failed to delete card. Please try again.');
+            console.error(err);
+            setError('Failed to delete card. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -175,26 +170,26 @@ const CardManager = () => {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8 text-white relative">
+        <div className="container mx-auto px-4 py-8 text-white relative max-w-7xl">
             {loading && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="loader border-t-4 border-blue-600 border-solid rounded-full w-16 h-16 animate-spin"></div>
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+                    <div className="loader border-t-4 border-blue-500 border-solid rounded-full w-12 h-12 animate-spin"></div>
                 </div>
             )}
 
-            <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
-                <FiCreditCard className="text-yellow-400" /> Manage Cards
+            <h2 className="text-3xl font-bold mb-8 flex items-center gap-3 text-gray-100">
+                <FiCreditCard className="text-yellow-500 text-4xl" /> Manage Cards
             </h2>
 
             {error && (
-                <div className="bg-red-600 text-white p-3 rounded mb-4">
+                <div className="bg-red-500/20 border border-red-500 text-red-300 p-4 rounded-lg mb-6 shadow-md">
                     {error}
                 </div>
             )}
 
             <motion.button
-                className="fixed right-2 bottom-5 bg-yellow-400 text-black p-2 rounded-full shadow-lg hover:bg-yellow-300 transition"
-                whileHover={{ scale: 1.1 }}
+                className="fixed right-8 bottom-8 bg-yellow-500 text-gray-900 p-4 rounded-full shadow-lg hover:bg-yellow-400 transition-colors z-40"
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowForm(!showForm)}
             >
@@ -205,10 +200,10 @@ const CardManager = () => {
                 {showForm && (
                     <motion.form
                         onSubmit={handleSubmit}
-                        initial={{ opacity: 0, y: 30 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 30 }}
-                        className="bg-gray-800 p-6 rounded-lg shadow-lg mb-8"
+                        exit={{ opacity: 0, y: 20 }}
+                        className="bg-gray-800/50 backdrop-blur-md p-6 rounded-xl shadow-xl mb-8 border border-gray-700"
                     >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <select
@@ -216,7 +211,7 @@ const CardManager = () => {
                                 value={formData.cardType}
                                 onChange={handleChange}
                                 disabled={editingId}
-                                className="p-3 rounded bg-gray-700 text-white border-none focus:ring-2 focus:ring-blue-600"
+                                className="w-full p-3 rounded-lg bg-gray-700/50 text-gray-200 border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
                             >
                                 <option value="FreshCard">Fresh Card</option>
                                 <option value="AgedCard">Aged Card</option>
@@ -228,7 +223,7 @@ const CardManager = () => {
                                 value={formData.title}
                                 onChange={handleChange}
                                 placeholder="Title"
-                                className="p-3 rounded bg-gray-700"
+                                className="w-full p-3 rounded-lg bg-gray-700/50 text-gray-200 border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
                                 required
                             />
                             <input
@@ -237,7 +232,7 @@ const CardManager = () => {
                                 value={formData.bank}
                                 onChange={handleChange}
                                 placeholder="Bank"
-                                className="p-3 rounded bg-gray-700"
+                                className="w-full p-3 rounded-lg bg-gray-700/50 text-gray-200 border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
                                 required
                             />
                             <input
@@ -246,7 +241,7 @@ const CardManager = () => {
                                 value={formData.price}
                                 onChange={handleChange}
                                 placeholder="Price"
-                                className="p-3 rounded bg-gray-700"
+                                className="w-full p-3 rounded-lg bg-gray-700/50 text-gray-200 border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
                                 required
                             />
                             <input
@@ -255,30 +250,32 @@ const CardManager = () => {
                                 value={formData.stockQuantity}
                                 onChange={handleChange}
                                 placeholder="Stock Quantity"
-                                className="p-3 rounded bg-gray-700"
+                                className="w-full p-3 rounded-lg bg-gray-700/50 text-gray-200 border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
                                 required
                             />
-                            <input
-                                type="file"
-                                name="imageFile"
-                                onChange={handleChange}
-                                className="p-3 rounded bg-gray-700 text-white"
-                                accept="image/*"
-                            />
-                            {formData.imagePreview && (
-                                <img
-                                    src={formData.imagePreview}
-                                    alt="Preview"
-                                    className="w-full h-44 object-cover rounded-md mt-2"
+                            <div className="col-span-1 md:col-span-2">
+                                <input
+                                    type="file"
+                                    name="imageFile"
+                                    onChange={handleChange}
+                                    className="w-full p-3 rounded-lg bg-gray-700/50 text-gray-200 border border-gray-600 file:bg-blue-600 file:text-white file:border-0 file:px-4 file:py-2 file:rounded-lg file:cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
+                                    accept="image/*"
                                 />
-                            )}
+                                {formData.imagePreview && (
+                                    <img
+                                        src={formData.imagePreview}
+                                        alt="Preview"
+                                        className="w-full h-48 object-cover rounded-lg mt-4 border border-gray-600"
+                                    />
+                                )}
+                            </div>
                             <input
                                 type="text"
                                 name="cardNumber"
                                 value={formData.cardNumber}
                                 onChange={handleChange}
                                 placeholder="Card Number"
-                                className="p-3 rounded bg-gray-700"
+                                className="w-full p-3 rounded-lg bg-gray-700/50 text-gray-200 border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
                                 required
                             />
                             <input
@@ -287,7 +284,7 @@ const CardManager = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 placeholder="Password"
-                                className="p-3 rounded bg-gray-700"
+                                className="w-full p-3 rounded-lg bg-gray-700/50 text-gray-200 border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
                                 required
                             />
                             {formData.cardType === 'BankCard' && (
@@ -297,7 +294,7 @@ const CardManager = () => {
                                     value={formData.balance}
                                     onChange={handleChange}
                                     placeholder="Balance"
-                                    className="p-3 rounded bg-gray-700"
+                                    className="w-full p-3 rounded-lg bg-gray-700/50 text-gray-200 border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
                                     required
                                 />
                             )}
@@ -309,7 +306,7 @@ const CardManager = () => {
                                         value={formData.usageDurationMonths}
                                         onChange={handleChange}
                                         placeholder="Usage Duration (Months)"
-                                        className="p-3 rounded bg-gray-700"
+                                        className="w-full p-3 rounded-lg bg-gray-700/50 text-gray-200 border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
                                         required
                                     />
                                     <input
@@ -318,16 +315,16 @@ const CardManager = () => {
                                         value={formData.condition}
                                         onChange={handleChange}
                                         placeholder="Condition"
-                                        className="p-3 rounded bg-gray-700"
+                                        className="w-full p-3 rounded-lg bg-gray-700/50 text-gray-200 border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
                                         required
                                     />
                                 </>
                             )}
                         </div>
-                        <div className="mt-4 flex gap-4">
+                        <div className="mt-6 flex justify-end gap-4">
                             <Button
                                 type="submit"
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg shadow-md transition"
                             >
                                 {editingId ? 'Update' : 'Add'} Card
                             </Button>
@@ -339,7 +336,7 @@ const CardManager = () => {
                                         setEditingId(null);
                                         setShowForm(false);
                                     }}
-                                    className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded"
+                                    className="bg-gray-600 hover:bg-gray-500 text-white px-6 py-2.5 rounded-lg shadow-md transition"
                                 >
                                     Cancel
                                 </Button>
@@ -349,74 +346,65 @@ const CardManager = () => {
                 )}
             </AnimatePresence>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 w-full sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {cards.length > 0 ? (
                     cards.map((card) => (
-                        <div
+                        <motion.div
                             key={card._id}
-                            className="bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition transform hover:scale-105 flex flex-col"
+                            className="bg-gray-800/50 backdrop-blur-md rounded-xl shadow-lg overflow-hidden hover:shadow-xl border border-gray-700 flex flex-col transition-all duration-300 hover:border-blue-500/50"
+                            whileHover={{ y: -5, scale: 1.02 }}
                         >
                             {card.imageUrl && (
                                 <img
                                     src={`${API_BASE}${card.imageUrl}`}
                                     alt={card.title}
-                                    className="w-full h-44 object-cover flex-shrink-0"
+                                    className="w-full h-48 object-cover flex-shrink-0"
                                     onError={(e) => {
                                         e.target.src = `${API_BASE}/images/default-card.png`;
                                     }}
                                 />
                             )}
-                            <div className="p-4 flex flex-col justify-between flex-grow">
+                            <div className="p-5 flex flex-col justify-between flex-grow">
                                 <div>
-                                    <h3 className="text-lg font-bold text-white">{card.title}</h3>
-                                    <p className="text-gray-300">
-                                        {card.bank} - {getCardTypeDisplay(card.cardType)}
-                                    </p>
+                                    <h3 className="text-xl font-semibold text-gray-100 mb-1">{card.title}</h3>
+                                    <p className="text-gray-400 text-sm mb-2">{card.bank} - {getCardTypeDisplay(card.cardType)}</p>
                                     {card.cardType === 'BankCard' && (
-                                        <p className="text-green-400 mt-1">Balance: ${card.balance}</p>
+                                        <p className="text-green-400 text-sm font-medium mb-1">Balance: ${card.balance}</p>
                                     )}
                                     {card.cardType === 'AgedCard' && (
                                         <>
-                                            <p className="text-blue-400 mt-1">
-                                                Aged: {card.usageDurationMonths} months
-                                            </p>
-                                            <p className="text-gray-400 mt-1">
-                                                Condition: {card.condition}
-                                            </p>
+                                            <p className="text-blue-400 text-sm mb-1">Aged: {card.usageDurationMonths} months</p>
+                                            <p className="text-gray-400 text-sm mb-1">Condition: {card.condition}</p>
                                         </>
                                     )}
-                                    <p className="text-yellow-400 mt-2 font-semibold">
-                                        Price: ${card.price}
-                                    </p>
-                                    <p className="text-gray-300 mt-1">Stock: {card.stockQuantity}</p>
+                                    <p className="text-yellow-400 font-bold text-lg mb-1">Price: ${card.price}</p>
+                                    <p className="text-gray-400 text-sm">Stock: {card.stockQuantity}</p>
                                 </div>
-                                <div className="flex justify-end mt-4 gap-3">
+                                <div className="flex justify-end mt-4 gap-2">
                                     <motion.button
                                         onClick={() => handleEdit(card)}
-                                        className="p-2 rounded bg-gray-700 text-yellow-400 hover:bg-gray-600 hover:text-yellow-300 transition"
+                                        className="p-2.5 rounded-lg bg-gray-700/50 text-yellow-400 hover:bg-gray-600/50 transition shadow-sm"
                                         title="Edit Card"
-                                        whileHover={{ scale: 1.2 }}
-                                        whileTap={{ scale: 0.9 }}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
                                     >
                                         <FiEdit size={20} />
                                     </motion.button>
                                     <motion.button
                                         onClick={() => handleDelete(card._id)}
-                                        className="p-2 rounded bg-gray-700 text-red-500 hover:bg-gray-600 hover:text-red-400 transition"
+                                        className="p-2.5 rounded-lg bg-gray-700/50 text-red-400 hover:bg-gray-600/50 transition shadow-sm"
                                         title="Delete Card"
-                                        whileHover={{ scale: 1.2 }}
-                                        whileTap={{ scale: 0.9 }}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
                                     >
                                         <FiTrash2 size={20} />
                                     </motion.button>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))
                 ) : (
-                    <p className="text-gray-300 col-span-full text-center">
-                        No cards available.
-                    </p>
+                    <p className="text-gray-400 col-span-full text-center py-8">No cards available yet. Add one to get started.</p>
                 )}
             </div>
         </div>

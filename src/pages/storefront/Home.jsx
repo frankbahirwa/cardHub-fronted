@@ -34,12 +34,12 @@ import Capitala from '../../assets/images/image/Capitala.jpg';
 import TD from '../../assets/images/image/TD.jpg';
 import Chasa from '../../assets/images/image/Chasa.jpg';
 import Truists from '../../assets/images/image/Truists.jpg';
-import USBank from '../../assets/images/image/USBank.jpg';
+import UsBank from '../../assets/images/image/UsBank.jpg';
 import Visa from '../../assets/images/image/Visa.jpg';
 
 const sliderImages = [
      AmericanExpress,Aviator , BOA , Region, Sofi, Truist, Wells, Pnc, Truists, Navy, TD,Fidelity, Discover,
-    Citi, Chales, Visa, Chase, Capital, Bmo, Chasa, Boa, Alliance, Ally , USBank, Capitala, BOA2
+    Citi, Chales, Visa, Chase, Capital, Bmo, Chasa, Boa, Alliance, Ally , UsBank, Capitala, BOA2
 ];
 
 const Home = () => {
